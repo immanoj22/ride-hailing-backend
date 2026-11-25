@@ -8,29 +8,36 @@ I moved this from a Node and MongoDB backend to Java. Each service owns its own 
 
 ```mermaid
 flowchart LR
-    R[Rider app] --> API
-    D[Driver app] --> API
-    A[Admin panel] --> API
-    API[REST APIs] --> U[user-service]
-    API --> DR[driver-service]
-    API --> RS[ride-service]
-    API --> AD[admin-service]
-    API --> HD[helperdesk-service]
-    API --> CM[common-service]
-    R -. Socket.IO .-> SK[socket-service]
-    D -. Socket.IO .-> SK
-    API -. services also call each other over REST .-> API
-    U & DR & RS & AD & HD & SK & NT[notification-service] --> PG[(PostgreSQL, one database per service)]
-    RS -->|push queue| MQ[[RabbitMQ]]
-    U -->|push queue| MQ
-    DR -->|push queue| MQ
+    R["Rider app"] --> API["REST APIs"]
+    D["Driver app"] --> API
+    A["Admin panel"] --> API
+    API --> U["user-service"]
+    API --> DR["driver-service"]
+    API --> RS["ride-service"]
+    API --> AD["admin-service"]
+    API --> HD["helperdesk-service"]
+    API --> CM["common-service"]
+    R -->|"Socket IO"| SK["socket-service"]
+    D -->|"Socket IO"| SK
+    U --> PG[("PostgreSQL: one database per service")]
+    DR --> PG
+    RS --> PG
+    AD --> PG
+    HD --> PG
+    SK --> PG
+    NT["notification-service"] --> PG
+    U -->|"push queue"| MQ["RabbitMQ"]
+    DR -->|"push queue"| MQ
+    RS -->|"push queue"| MQ
     MQ --> NT
-    RS -->|pub/sub| RD[(Redis)]
+    RS -->|"pub/sub"| RD[("Redis")]
     RD --> SK
-    NT --> EXT1[Firebase push, Twilio SMS, email]
-    RS --> EXT2[Razorpay payments, Google Maps]
-    CM --> EXT3[S3 uploads]
+    NT --> EXT1["Firebase push, Twilio SMS, email"]
+    RS --> EXT2["Razorpay payments, Google Maps"]
+    CM --> EXT3["S3 uploads"]
 ```
+
+Services also call each other over REST.
 
 ## Services
 
