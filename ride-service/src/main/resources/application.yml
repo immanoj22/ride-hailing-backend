@@ -1,0 +1,60 @@
+server:
+  port: ${PORT:3006}
+
+spring:
+  application:
+    name: ride-service
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:ridehail_ride}
+    username: ${DB_USER:postgres}
+    password: ${DB_PASSWORD:postgres}
+    hikari:
+      maximum-pool-size: ${DB_POOL_SIZE:10}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        format_sql: false
+        jdbc:
+          time_zone: UTC
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+  data:
+    redis:
+      url: ${REDIS_URL:redis://localhost:6379}
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USER:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
+
+ridehail:
+  env: ${NODE_ENV:development}
+  enc-secret: ${ENC_SECRET:}
+  jwt:
+    user-secret: ${USER_JWT_SECRET:}
+    driver-secret: ${DRIVER_JWT_SECRET:}
+    admin-secret: ${ADMIN_JWT_SECRET:}
+    in-app-secret: ${IN_APP_SECRET:}
+    other-secret: ${OTHER_SECRET:}
+    other-secret-exp-in-sec: ${OTHER_SECRET_EXP_IN_SEC:3600}
+  s3:
+    access-key: ${S3_ACCESSKEY:}
+    secret-key: ${S3_SECRET:}
+    region: ${S3_REGION:ap-south-1}
+    bucket-name: ${S3_BUCKET_NAME:ridehail}
+  razorpay:
+    key-id: ${RAZORPAY_KEY_ID:}
+    key-secret: ${RAZORPAY_KEY_SECRET:}
+  services:
+    common-url: ${COMMON_SERVICE_URL:http://localhost:3004/common-apis}
+    user-url: ${USER_SERVICE_URL:http://localhost:3002/user-apis}
+    driver-url: ${DRIVER_SERVICE_URL:http://localhost:3001/driver-apis}
+    admin-url: ${ADMIN_SERVICE_URL:http://localhost:3005/admin-apis}
+    ride-url: ${RIDE_SERVICE_URL:http://localhost:3006/ride-apis}
+    vehicle-url: ${VEHICLE_SERVICE_URL:http://localhost:3006/vehicle-apis}
+    notification-url: ${NOTIFICATION_SERVICE_URL:http://localhost:3003/notification-apis}
+    socket-url: ${SOCKET_SERVICE_URL:http://localhost:8000/socket-apis}

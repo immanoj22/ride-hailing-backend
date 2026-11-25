@@ -1,0 +1,195 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: ridehail-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./docker/postgres-init.sql:/docker-entrypoint-initdb.d/01-init.sql
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: ridehail-redis
+    ports:
+      - "6380:6379"
+    volumes:
+      - redis-data:/data
+    command: ["redis-server", "--appendonly", "yes"]
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: ridehail-rabbitmq
+    ports:
+      - "5673:5672"
+      - "15673:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  common-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        SERVICE_MODULE: common-service
+    env_file: [dev.env]
+    environment:
+      PORT: 3004
+    ports: ["3004:3004"]
+    depends_on:
+      redis:
+        condition: service_started
+
+  user-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        SERVICE_MODULE: user-service
+    env_file: [dev.env]
+    environment:
+      PORT: 3002
+      DB_NAME: ridehail_user
+    ports: ["3002:3002"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
+
+  driver-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        SERVICE_MODULE: driver-service
+    env_file: [dev.env]
+    environment:
+      PORT: 3001
+      DB_NAME: ridehail_driver
+    ports: ["3001:3001"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
+
+  ride-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        SERVICE_MODULE: ride-service
+    env_file: [dev.env]
+    environment:
+      PORT: 3006
+      DB_NAME: ridehail_ride
+    ports: ["3006:3006"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
+
+  notification-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        SERVICE_MODULE: notification-service
+    env_file: [dev.env]
+    environment:
+      PORT: 3003
+      DB_NAME: ridehail_notification
+    volumes:
+      - ./secrets/firebase-credentials.json:/app/secrets/firebase-credentials.json:ro
+    ports: ["3003:3003"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
+
+  admin-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        SERVICE_MODULE: admin-service
+    env_file: [dev.env]
+    environment:
+      PORT: 3005
+      DB_NAME: ridehail_admin
+    ports: ["3005:3005"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
+
+  helperdesk-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        SERVICE_MODULE: helperdesk-service
+    env_file: [dev.env]
+    environment:
+      PORT: 3009
+      DB_NAME: ridehail_helperdesk
+    ports: ["3009:3009"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
+
+  socket-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        SERVICE_MODULE: socket-service
+    env_file: [dev.env]
+    environment:
+      PORT: 8000
+      DB_NAME: ridehail_socket
+    ports:
+      - "8000:8000"
+      - "8001:8001" # netty-socketio port, if separate from the REST port - see socket-service notes
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
+
+volumes:
+  postgres-data:
+    driver: local
+  redis-data:
+    driver: local

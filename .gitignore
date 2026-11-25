@@ -1,0 +1,11 @@
+target/
+*.log
+.dev-logs/
+.dev-pids/
+dev.env
+local.env
+*.env.local
+secrets/
+firebase-credentials.json
+.idea/
+*.iml

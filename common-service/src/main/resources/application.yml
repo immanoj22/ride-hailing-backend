@@ -1,0 +1,32 @@
+server:
+  port: ${PORT:3004}
+
+spring:
+  application:
+    name: common-service
+  data:
+    redis:
+      url: ${REDIS_URL:redis://localhost:6379}
+
+ridehail:
+  env: ${NODE_ENV:development}
+  enc-secret: ${ENC_SECRET:}
+  jwt:
+    user-secret: ${USER_JWT_SECRET:}
+    driver-secret: ${DRIVER_JWT_SECRET:}
+    admin-secret: ${ADMIN_JWT_SECRET:}
+    in-app-secret: ${IN_APP_SECRET:}
+    other-secret: ${OTHER_SECRET:}
+    other-secret-exp-in-sec: ${OTHER_SECRET_EXP_IN_SEC:3600}
+  services:
+    user-url: ${USER_SERVICE_URL:http://localhost:3002/user-apis}
+    driver-url: ${DRIVER_SERVICE_URL:http://localhost:3001/driver-apis}
+    admin-url: ${ADMIN_SERVICE_URL:http://localhost:3005/admin-apis}
+  s3:
+    access-key: ${S3_ACCESSKEY:}
+    secret-key: ${S3_SECRET:}
+    region: ${S3_REGION:ap-south-1}
+    bucket-name: ${S3_BUCKET_NAME:ridehail}
+  google:
+    api-key: ${GOOGLE_API_KEY:}
+    web-client-id: ${GOOGLE_WEB_CLIENT_ID:}
