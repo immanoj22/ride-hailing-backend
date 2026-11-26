@@ -1,5 +1,7 @@
 # ride-hailing-backend
 
+[![build](https://github.com/immanoj22/ride-hailing-backend/actions/workflows/build.yml/badge.svg)](https://github.com/immanoj22/ride-hailing-backend/actions/workflows/build.yml)
+
 The backend for a cab booking platform, built as eight Spring Boot services. It covers everything behind a rider app, a driver app and an admin panel: accounts, driver onboarding, ride booking and tracking, payments, notifications, support and live chat.
 
 I moved this from a Node and MongoDB backend to Java. Each service owns its own PostgreSQL database and its own schema migrations.
